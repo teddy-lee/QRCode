@@ -43,8 +43,7 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 	public void setCamera(Camera camera) {
 		mCamera = camera;
 		if (mCamera != null) {
-			mSupportedPreviewSizes = mCamera.getParameters()
-					.getSupportedPreviewSizes();
+			mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
 			requestLayout();
 		}
 	}

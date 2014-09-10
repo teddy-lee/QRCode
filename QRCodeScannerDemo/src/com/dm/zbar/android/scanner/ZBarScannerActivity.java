@@ -5,6 +5,7 @@ import java.io.IOException;
 import net.sourceforge.zbar.Config;
 import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
+import net.sourceforge.zbar.Orientation;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
 import android.app.Activity;
@@ -228,17 +229,6 @@ public class ZBarScannerActivity extends Activity implements
 			}
 		}
 	};
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		// TODO Auto-generated method stub
-		if (!mPreviewing) {
-			startScan();
-		} else {
-			stopScan();
-		}
-		return true;
-	}
 	
 	private final OnCompletionListener beepListener = new OnCompletionListener() {
 		public void onCompletion(MediaPlayer mediaPlayer) {
