@@ -86,8 +86,9 @@ public class Image {
 
 	public Image convert(String paramString) {
 		long l = convert(this.peer, paramString);
-		if (l == 0L)
+		if (l == 0L) {
 			return null;
+		}
 		return new Image(l);
 	}
 
