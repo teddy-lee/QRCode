@@ -180,7 +180,9 @@ public class ZBarScannerActivity extends Activity implements
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
-		startScan();
+		if (!mPreviewing) {
+			startScan();
+		}
 		return true;
 	}
 
