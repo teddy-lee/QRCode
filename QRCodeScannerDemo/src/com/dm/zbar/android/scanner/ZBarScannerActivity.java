@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -21,7 +22,7 @@ import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
 
 public class ZBarScannerActivity extends Activity implements
-		Camera.PreviewCallback, ZBarConstants {
+		Camera.PreviewCallback, ZBarConstants, View.OnClickListener {
 
 	private static final String TAG = "ZBarScannerActivity";
 	private CameraPreview mPreview;
@@ -29,6 +30,8 @@ public class ZBarScannerActivity extends Activity implements
 	private ImageScanner mScanner;
 	private Handler mAutoFocusHandler;
 	private boolean mPreviewing = true;
+	
+	FrameLayout preview;
 
 	static {
 		System.loadLibrary("iconv");
@@ -55,7 +58,8 @@ public class ZBarScannerActivity extends Activity implements
 		mPreview = new CameraPreview(this, this, autoFocusCB);
 		setContentView(R.layout.main);
 
-		FrameLayout preview = (FrameLayout) findViewById(R.id.cameraPreview);
+		preview = (FrameLayout) findViewById(R.id.cameraPreview);
+		preview.setOnClickListener(this);
 		preview.addView(mPreview);
 
 		// Create and configure the ImageScanner;
@@ -155,14 +159,7 @@ public class ZBarScannerActivity extends Activity implements
 			for (Symbol sym : syms) {
 				String symData = sym.getData();
 				if (!TextUtils.isEmpty(symData)) {
-					// Intent dataIntent = new Intent();
-					// dataIntent.putExtra(SCAN_RESULT, symData);
-					// dataIntent.putExtra(SCAN_RESULT_TYPE, sym.getType());
-					// setResult(Activity.RESULT_OK, dataIntent);
-					// finish();
-					Toast.makeText(this, "Scan Result = " + symData,
-							Toast.LENGTH_SHORT).show();
-					stopScan();
+					Toast.makeText(this, "Scan Result = " + symData, Toast.LENGTH_SHORT).show();
 					break;
 				}
 			}
@@ -182,6 +179,8 @@ public class ZBarScannerActivity extends Activity implements
 		// TODO Auto-generated method stub
 		if (!mPreviewing) {
 			startScan();
+		} else {
+			stopScan();
 		}
 		return true;
 	}
@@ -192,4 +191,20 @@ public class ZBarScannerActivity extends Activity implements
 			mAutoFocusHandler.postDelayed(doAutoFocus, 1000);
 		}
 	};
+
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+		case R.id.cameraPreview:
+			if (!mPreviewing) {
+				stopScan();
+				startScan();
+			}
+			
+			break;
+
+		default:
+			break;
+		}
+	}
 }
