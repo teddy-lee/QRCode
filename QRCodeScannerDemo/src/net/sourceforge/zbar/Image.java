@@ -71,8 +71,6 @@ public class Image {
 		this.peer = paramLong;
 	}
 
-	
-
 	protected void finalize() {
 		destroy();
 	}
