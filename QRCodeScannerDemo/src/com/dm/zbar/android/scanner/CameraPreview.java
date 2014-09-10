@@ -54,15 +54,12 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 		// We purposely disregard child measurements because act as a
 		// wrapper to a SurfaceView that centers the camera preview instead
 		// of stretching it.
-		final int width = resolveSize(getSuggestedMinimumWidth(),
-				widthMeasureSpec);
-		final int height = resolveSize(getSuggestedMinimumHeight(),
-				heightMeasureSpec);
+		final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+		final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
 		setMeasuredDimension(width, height);
 
 		if (mSupportedPreviewSizes != null) {
-			mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width,
-					height);
+			mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width,	height);
 		}
 	}
 
@@ -84,15 +81,11 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 
 			// Center the child SurfaceView within the parent.
 			if (width * previewHeight > height * previewWidth) {
-				final int scaledChildWidth = previewWidth * height
-						/ previewHeight;
-				child.layout((width - scaledChildWidth) / 2, 0,
-						(width + scaledChildWidth) / 2, height);
+				final int scaledChildWidth = previewWidth * height / previewHeight;
+				child.layout((width - scaledChildWidth) / 2, 0, (width + scaledChildWidth) / 2, height);
 			} else {
-				final int scaledChildHeight = previewHeight * width
-						/ previewWidth;
-				child.layout(0, (height - scaledChildHeight) / 2, width,
-						(height + scaledChildHeight) / 2);
+				final int scaledChildHeight = previewHeight * width / previewWidth;
+				child.layout(0, (height - scaledChildHeight) / 2, width, (height + scaledChildHeight) / 2);
 			}
 		}
 	}
@@ -139,8 +132,9 @@ class CameraPreview extends ViewGroup implements SurfaceHolder.Callback {
 		// Try to find an size match aspect ratio and size
 		for (Size size : sizes) {
 			double ratio = (double) size.width / size.height;
-			if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+			if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) {
 				continue;
+			}
 			if (Math.abs(size.height - targetHeight) < minDiff) {
 				optimalSize = size;
 				minDiff = Math.abs(size.height - targetHeight);

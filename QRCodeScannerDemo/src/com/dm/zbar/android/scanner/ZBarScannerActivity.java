@@ -1,13 +1,23 @@
 package com.dm.zbar.android.scanner;
 
-import com.dm.zbar.android.examples.R;
+import java.io.IOException;
 
+import net.sourceforge.zbar.Config;
+import net.sourceforge.zbar.Image;
+import net.sourceforge.zbar.ImageScanner;
+import net.sourceforge.zbar.Symbol;
+import net.sourceforge.zbar.SymbolSet;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
 import android.hardware.Camera;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -15,21 +25,24 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
-import net.sourceforge.zbar.Config;
-import net.sourceforge.zbar.Image;
-import net.sourceforge.zbar.ImageScanner;
-import net.sourceforge.zbar.Symbol;
-import net.sourceforge.zbar.SymbolSet;
+
+import com.dm.zbar.android.examples.R;
 
 public class ZBarScannerActivity extends Activity implements
 		Camera.PreviewCallback, ZBarConstants, View.OnClickListener {
 
 	private static final String TAG = "ZBarScannerActivity";
+	
+	private static final float BEEP_VOLUME = 0.10f;
+	private static final long VIBRATE_DURATION = 200L;
+	
 	private CameraPreview mPreview;
 	private Camera mCamera;
 	private ImageScanner mScanner;
 	private Handler mAutoFocusHandler;
 	private boolean mPreviewing = true;
+	private boolean playBeep = true;
+	private MediaPlayer mediaPlayer;
 	
 	FrameLayout preview;
 
@@ -61,6 +74,14 @@ public class ZBarScannerActivity extends Activity implements
 		preview = (FrameLayout) findViewById(R.id.cameraPreview);
 		preview.setOnClickListener(this);
 		preview.addView(mPreview);
+		
+		// open Vibrator 
+		AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
+		if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
+			playBeep = false;
+		}
+		// init beep
+		initBeepSound();
 
 		// Create and configure the ImageScanner;
 		setupScanner();
@@ -99,6 +120,39 @@ public class ZBarScannerActivity extends Activity implements
 		mPreview.showSurfaceView();
 
 		mPreviewing = true;
+	}
+	
+	/**
+	 * initialize sound
+	 */
+	private void initBeepSound() {
+		if (playBeep && mediaPlayer == null) {
+			setVolumeControlStream(AudioManager.STREAM_MUSIC);
+			mediaPlayer = new MediaPlayer();
+			mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			mediaPlayer.setOnCompletionListener(beepListener);
+			AssetFileDescriptor file = getResources().openRawResourceFd(R.raw.beep);
+			try {
+				mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
+				file.close();
+				mediaPlayer.setVolume(BEEP_VOLUME, BEEP_VOLUME);
+				mediaPlayer.prepare();
+			} catch (IOException e) {
+				mediaPlayer = null;
+			}
+		}
+	}
+
+	/**
+	 * Play sound and vibrate
+	 */
+	private void playBeepSoundAndVibrate() {
+		if (playBeep && mediaPlayer != null) {
+			mediaPlayer.start();
+		}
+		// open vibrate
+		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		vibrator.vibrate(VIBRATE_DURATION);
 	}
 
 	private void stopScan() {
@@ -155,6 +209,7 @@ public class ZBarScannerActivity extends Activity implements
 			mCamera.setPreviewCallback(null);
 			mCamera.stopPreview();
 			mPreviewing = false;
+			playBeepSoundAndVibrate();
 			SymbolSet syms = mScanner.getResults();
 			for (Symbol sym : syms) {
 				String symData = sym.getData();
@@ -184,6 +239,12 @@ public class ZBarScannerActivity extends Activity implements
 		}
 		return true;
 	}
+	
+	private final OnCompletionListener beepListener = new OnCompletionListener() {
+		public void onCompletion(MediaPlayer mediaPlayer) {
+			mediaPlayer.seekTo(0);
+		}
+	};
 
 	// Mimic continuous auto-focusing
 	Camera.AutoFocusCallback autoFocusCB = new Camera.AutoFocusCallback() {
